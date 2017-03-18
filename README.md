@@ -1,4 +1,3 @@
-# vm-vagrant-docker-ansible-centos7
 
 Example of Docker provider for Vagrant
 ======================================
@@ -10,23 +9,22 @@ to a CentOS 7 VirtualBox VM.
 Why use it?
 -----------
 There is a [strong argument against using Docker containers similar to virtual
-machines]
-(http://techblog.constantcontact.com/devops/a-tale-of-three-docker-anti-patterns/)
+machines](http://techblog.constantcontact.com/devops/a-tale-of-three-docker-anti-patterns/)
 where one machine is responsible for multiple concerns such as running a
-webserver, a database server, application server, etc.  Despite this, there is a
+web server, a database server, application server, etc.  Despite this, there is a
 scenario where you may still want to use a Docker container with multiple
 concerns:
 * Your production environment uses servers with multiple concerns and you just
-want a similiar environment in your development machine.  And...
+want a similar environment in your development machine.  And...
 * Given that virtual machines usually consume [more memory and takes longer to
-start] (https://www.slideshare.net/Flux7Labs/performance-of-docker-vs-vms), you
+start](https://www.slideshare.net/Flux7Labs/performance-of-docker-vs-vms), you
 want to avoid the overhead of running a full-blown virtual machine such as those
 provided by VirtualBox, VMWare etc.
 
 When to use it?
 ---------------
 This Vagrant project is able to run its Docker container in GNU/Linux hosts
-only.  In any developent team today, you will inevitably find most people using
+only.  In any development team today, you will inevitably find most people using
 MacOS as their host platform.  So in most cases you cannot roll out a team-wide
 Vagrant VM based on this project.  But there are scenarios where this project
 could still be used:
@@ -38,7 +36,7 @@ your choice of a GNU/Linux only Vagrant project.
 How to use it?
 --------------
 1. Install Vagrant and Docker if necessary.
-2. [Install Ansible] (http://docs.ansible.com/ansible/intro_installation.html).
+2. [Install Ansible](http://docs.ansible.com/ansible/intro_installation.html).
 The playbooks have been tested in version 2.1.0.0.
 3. "vagrant up" should create a Docker image based on the "build/Dockerfile"
 file and then launch a Docker container created out of that image.
@@ -65,6 +63,5 @@ names.  For example, curl -I https://drupal.org/ will fail.  Fix is
 simple: sudo chmod +r /etc/resolve.conf
 * "yum -y install httpd" may fail with a ["cpio: cap_set_file" error message]
 (https://hub.docker.com/r/centos/httpd/builds/baybetifj2mnnq8wzszdik8/).  This
-is due to [complications with the AUFS file system]
-(https://github.com/docker/docker/issues/6980).  This can be ignored because the
-Ansible playbook has tasks to sort this out.
+is due to [complications with the AUFS file system](https://github.com/docker/docker/issues/6980).
+This can be ignored because the Ansible playbook has tasks to sort this out.
