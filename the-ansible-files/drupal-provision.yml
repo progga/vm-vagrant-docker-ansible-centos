@@ -1,0 +1,96 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Add EPEL repository
+      yum_repository:
+        name: epel
+        description: EPEL YUM repo
+        baseurl: http://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+        gpgkey: http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+    - name: Install IUS repo release package
+      yum:
+        name: https://centos7.iuscommunity.org/ius-release.rpm
+        state: present
+    - name: Install which!
+      yum: name=which state=present
+    - name: Install less!
+      yum: name=less state=present
+    - name: Install htop
+      yum: name=htop state=present
+    - name: Install net-tools
+      yum: name=net-tools state=present
+    - name: Install php-cli
+      yum: name=php56u-cli state=present
+    - name: Install php-fpm
+      yum: name=php56u-fpm state=present
+    - name: Set php-fpm's max children to 10
+      ini_file: dest=/etc/php-fpm.d/www.conf section=www option=pm.max_children value=10
+    - name: Set php-fpm's min_spare_servers to 2
+      ini_file: dest=/etc/php-fpm.d/www.conf section=www option=pm.min_spare_servers value=2
+    - name: Set php-fpm's max_spare_servers to 5
+      ini_file: dest=/etc/php-fpm.d/www.conf section=www option=pm.max_spare_servers value=5
+    - name: Install PHP PDO
+      yum: name=php56u-pdo state=present
+    - name: Install sqlite3
+      yum: name=sqlite-devel state=present
+    - name: Install PHP GD
+      yum: name=php56u-gd state=present
+    - name: Install PHP Mbstring
+      yum: name=php56u-mbstring state=present
+    - name: Install git
+      yum: name=git state=present
+    - name: Install composer
+      get_url: url=https://getcomposer.org/composer.phar dest=/usr/local/bin/composer mode="u=rwx,g=rx,o=rx"
+    - name: Install Drush
+      command: /usr/local/bin/composer create-project drush/drush:~8 /usr/local/share/drush
+      args:
+        creates: /usr/local/share/drush/drush
+    - name: Assign executable file permission to Drush
+      file: path=/usr/local/share/drush/drush mode="u=rwx,g=rx,o=rx"
+    - name: Assign executable file permission to Drush launcher
+      file: path=/usr/local/share/drush/drush.launcher mode="u=rwx,g=rx,o=rx"
+    - name: Create symlink to make Drush available system-wide
+      file: src=/usr/local/share/drush/drush dest=/usr/local/bin/drush state=link
+    - name: Fetch Drupal
+      shell: COMPOSER_PROCESS_TIMEOUT=2000 /usr/local/bin/composer create-project drupal/drupal:~8 /srv/www/drupal
+      args:
+        creates: /srv/www/drupal/index.php
+    - name: Update file permission of Drupal instance
+      file: path=/srv/www/drupal recurse=yes owner=vagrant group=vagrant state=directory
+    - name: Install Drupal
+      command: /usr/local/bin/drush -y site-install --db-url=sqlite:///var/lib/drupal/d8.sqlite --site-name="Syslog demo site" --account-name=admin --account-pass=admin
+      args:
+        chdir: /srv/www/drupal
+        creates: /srv/www/drupal/sites/default/settings.php
+    - name: Update file permission of Drupal's settings.php file
+      file: path=/srv/www/drupal/sites/default/settings.php owner=vagrant group=vagrant mode="u=rw,g=rw,o=r" state=file
+    - name: Update file permission of Drupal instance's "files" directory
+      file: path=/srv/www/drupal/sites/default/files recurse=yes owner=vagrant group=php-fpm mode="u=rwx,g=rwxs,o=rx" state=directory
+    - name: Sqlite database directory needs write permission for php-fpm user
+      file: path=/var/lib/drupal owner=vagrant group=php-fpm mode="u=rwx,g=rwx" state=directory
+    - name: Update file permission of Drupal's database file
+      file: path=/var/lib/drupal/d8.sqlite owner=vagrant group=php-fpm mode="u=rw,g=rw,o=r" state=file
+    - name: Enable Drupal's syslog module
+      command: /usr/local/bin/drush -y pm-enable syslog
+      args:
+        chdir: /srv/www/drupal
+    - name: Install cron
+      yum: name=cronie state=present
+    - name: Setup cron for Drupal
+      cron:
+        name: "Call Drupal's cron every hour."
+        special_time: hourly
+        user: vagrant
+        job: /usr/local/bin/drush -y --root=/srv/www/drupal cron &> /tmp/drupal-last-cron-run-output.txt
+        cron_file: ansible-drupal-cron 
+    - name: Create virtual host configuration for drupal.dev
+      copy: src=conf/drupal/drupal.dev-vhost.conf dest=/etc/httpd/conf.d/drupal.dev.conf
+    - name: Start php-fpm
+      service: name=php-fpm state=started enabled=yes
+    - name: Add Apache's default document root
+      file: path=/var/www/html state=directory mode=0755 
+    - name: Add Apache's default log directory 
+      file: path=/var/log/httpd state=directory mode=0755 
+    - name: Restart Apache
+      service: name=httpd state=restarted enabled=yes
