@@ -32,15 +32,23 @@
       ini_file: dest=/etc/php-fpm.d/www.conf section=www option=pm.max_spare_servers value=5
     - name: Install PHP PDO
       yum: name=php56u-pdo state=present
-    - name: Install sqlite3
-      yum: name=sqlite-devel state=present
+    - name: Install PHP PDO MySQL driver
+      yum: name=php56u-mysqlnd state=present
     - name: Install PHP GD
       yum: name=php56u-gd state=present
     - name: Install PHP Mbstring
       yum: name=php56u-mbstring state=present
-    - name: Install git
+    - name: Install MySQL (MariaDB) client
+      yum: name=mariadb101u state=present
+    - name: Install MySQL (MariaDB) server
+      yum: name=mariadb101u-server state=present
+    - name: Enable MySQL service
+      service: name=mariadb state=started enabled=yes
+    - name: Install sqlite3
+      yum: name=sqlite-devel state=present
+    - name: Install Git
       yum: name=git state=present
-    - name: Install composer
+    - name: Install Composer
       get_url: url=https://getcomposer.org/composer.phar dest=/usr/local/bin/composer mode="u=rwx,g=rx,o=rx"
     - name: Install Drush
       command: /usr/local/bin/composer create-project drush/drush:~8 /usr/local/share/drush
@@ -59,7 +67,7 @@
     - name: Update file permission of Drupal instance
       file: path=/srv/www/drupal recurse=yes owner=vagrant group=vagrant state=directory
     - name: Install Drupal
-      command: /usr/local/bin/drush -y site-install --db-url=sqlite:///var/lib/drupal/d8.sqlite --site-name="Syslog demo site" --account-name=admin --account-pass=admin
+      command: /usr/local/bin/drush -y site-install standard --db-su=root --db-url=mysql://vagrant:Long_MySQL_Password_For_Drupal-8@localhost:3306/drupal0 --site-name="Drupal 8 demo site" --account-name=admin --account-pass=admin
       args:
         chdir: /srv/www/drupal
         creates: /srv/www/drupal/sites/default/settings.php
@@ -67,10 +75,6 @@
       file: path=/srv/www/drupal/sites/default/settings.php owner=vagrant group=vagrant mode="u=rw,g=rw,o=r" state=file
     - name: Update file permission of Drupal instance's "files" directory
       file: path=/srv/www/drupal/sites/default/files recurse=yes owner=vagrant group=php-fpm mode="u=rwx,g=rwxs,o=rx" state=directory
-    - name: Sqlite database directory needs write permission for php-fpm user
-      file: path=/var/lib/drupal owner=vagrant group=php-fpm mode="u=rwx,g=rwx" state=directory
-    - name: Update file permission of Drupal's database file
-      file: path=/var/lib/drupal/d8.sqlite owner=vagrant group=php-fpm mode="u=rw,g=rw,o=r" state=file
     - name: Enable Drupal's syslog module
       command: /usr/local/bin/drush -y pm-enable syslog
       args:
