@@ -57,10 +57,14 @@ Known issues
 ------------
 * As mentioned already, you cannot use this Vagrant project in non-Linux
 platforms.
-* /etc/resolve.conf (used for DNS) is not readable by non-root users.  So any
-process launched by the "vagrant" user will *not* be able to resolve any domain
-names.  For example, curl -I https://drupal.org/ will fail.  Fix is
-simple: sudo chmod +r /etc/resolve.conf
+* "vagrant reload" destroys the existing Docker container before creating a
+new one.  This means all data stored inside the container disappears after
+a "vagrant reload"!  This is different from what Vagrant does with Virtualbox.
+* In older versions of Docker (e.g. 1.6) /etc/resolve.conf (used for DNS) is not
+readable by non-root users.  So any process launched by the "vagrant" user will
+*not* be able to resolve any domain names.  For example,
+curl -I https://drupal.org/ will fail.  Fix is simple:
+sudo chmod +r /etc/resolve.conf
 * "yum -y install httpd" may fail with a ["cpio: cap_set_file" error message](https://hub.docker.com/r/centos/httpd/builds/baybetifj2mnnq8wzszdik8/).
 This is due to [complications with the AUFS file system](https://github.com/docker/docker/issues/6980).
 This can be ignored because the Ansible playbook has tasks to sort this out.
