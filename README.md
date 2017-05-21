@@ -16,22 +16,15 @@ scenario where you may still want to use a Docker container with multiple
 concerns:
 * Your production environment uses servers with multiple concerns and you just
 want a similar environment in your development machine.  And...
-* Given that virtual machines usually consume [more memory and takes longer to
+* Given that virtual machines usually consume [more memory and take longer to
 start](https://www.slideshare.net/Flux7Labs/performance-of-docker-vs-vms), you
 want to avoid the overhead of running a full-blown virtual machine such as those
 provided by VirtualBox, VMWare etc.
 
-When to use it?
----------------
-This Vagrant project is able to run its Docker container in GNU/Linux hosts
-only.  In any development team today, you will inevitably find most people using
-MacOS as their host platform.  So in most cases you cannot roll out a team-wide
-Vagrant VM based on this project.  But there are scenarios where this project
-could still be used:
-* You are the only developer in the team.  So no one else will be affected by
-your choice of a GNU/Linux only Vagrant project.
-* All developers are required to use a GNU/Linux host.  Rare case.
-* There is no team-wide Vagrant project, so you are free to roll your own.
+Compatibility
+-------------
+This Vagrant project has been tested on GNU/Linux using Docker 1.12 and on Mac OS
+using Docker 17.
 
 How to use it?
 --------------
@@ -55,8 +48,8 @@ Software versions used
 
 Known issues
 ------------
-* As mentioned already, you cannot use this Vagrant project in non-Linux
-platforms.
+* ~~As mentioned already, you cannot use this Vagrant project in non-Linux
+-platforms.~~
 * "vagrant reload" destroys the existing Docker container before creating a
 new one.  This means all data stored inside the container disappears after
 a "vagrant reload"!  This is different from what Vagrant does with Virtualbox.
