@@ -32,7 +32,9 @@ Vagrant.configure(2) do |config|
       image.build_dir = "build"
       # Shared directory mapping.  Add more as needed.
       # Syntax is [host-dir:guest-dir, ...]
-      image.volumes = ["/sys/fs/cgroup:/sys/fs/cgroup:ro", '/tmp/centos7-docker-vagrant-ansible-build-run:/run']
+      image.volumes = ["/sys/fs/cgroup:/sys/fs/cgroup:ro"]
+      # @see https://github.com/moby/moby/issues/30723
+      image.create_args = ["--cap-add=SYS_ADMIN"]
       image.has_ssh = true
       image.remains_running = true
     end

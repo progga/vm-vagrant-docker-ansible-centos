@@ -3,15 +3,7 @@ MAINTAINER "you" <you@example.net>
 
 ENV container docker
 
-RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
-rm -f /lib/systemd/system/multi-user.target.wants/*;\
-rm -f /etc/systemd/system/*.wants/*;\
-rm -f /lib/systemd/system/local-fs.target.wants/*; \
-rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-rm -f /lib/systemd/system/basic.target.wants/*;\
-rm -f /lib/systemd/system/anaconda.target.wants/*; \
-yum -y install openssh-server httpd sudo curl; \
+RUN yum -y install openssh-server httpd sudo curl; \
 systemctl enable sshd.service; \
 systemctl enable httpd.service; \
 groupadd vagrant; \
@@ -26,8 +18,6 @@ curl --silent --output /home/vagrant/.ssh/authorized_keys https://raw.githubuser
 chown -R vagrant:vagrant /home/vagrant/.ssh; \
 chmod 0700 /home/vagrant/.ssh; \
 chmod 0600 /home/vagrant/.ssh/authorized_keys;
-
-VOLUME [ "/sys/fs/cgroup" ]
 
 EXPOSE 22 80
 
