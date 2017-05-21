@@ -45,6 +45,7 @@ Software versions used
 * Drupal: 8.x
 * Drush: 8.x
 * PHP (php-fpm): 5.6.x
+* MariaDB 10.1.x
 
 Known issues
 ------------
